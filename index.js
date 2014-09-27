@@ -93,7 +93,12 @@ server.post('/notify', function(req, res, next) {
 
             switch (action.type) {
             case 'updateCard':
-                message = userName + ' moved ' + cardName + ' to ' + listName + ' (' + boardName + ')';
+                if (action.data.old.hasOwnProperty('idList')) {
+                    message = userName + ' moved ' + cardName + ' to ' + listName + ' (' + boardName + ')';
+                } else if (action.data.old.hasOwnProperty('due')) {
+                    var dueDate = '<b>' + he.encode(action.data.card.due) + '</b>';
+                    message = userName + ' changed due date of ' + cardName + ' to ' + dueDate;
+                }
                 break;
             case 'createCard':
                 message = userName + ' created ' + cardName + ' in ' + listName + ' (' + boardName + ')';
@@ -105,8 +110,12 @@ server.post('/notify', function(req, res, next) {
             case 'deleteCard':
                 message = userName + ' deleted ' + cardName + ' from ' + listName + ' (' + boardName + ')';
                 break;
+            case 'addMemberToCard':
+                var memberName = '<b>' + he.encode(action.member.fullName) + '</b>';
+                message = userName + ' add ' + memberName + ' to ' + cardName + ' in ' + listName + ' (' + boardName + ')';
+                break;
             default:
-                message = userName + ' did something to ' + cardName + ' in ' + listName + ' (' + boardName + ')';
+                // message = userName + ' did something to ' + cardName + ' in ' + listName + ' (' + boardName + ')';
             }
         })();
     } else if (action.data.list) {
@@ -123,7 +132,7 @@ server.post('/notify', function(req, res, next) {
                 message = userName + ' created ' + listName + ' in ' + boardName;
                 break;
             default:
-                message = userName + ' did something to ' + listName + ' in ' + boardName;
+                // message = userName + ' did something to ' + listName + ' in ' + boardName;
             }
         })();
     }
