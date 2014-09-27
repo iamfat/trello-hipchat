@@ -77,37 +77,61 @@ server.post('/notify', function(req, res, next) {
     
     var action = req.body.action;
     var model = req.body.model;
-
-    var userName = '<b>' + he.encode(action.memberCreator.fullName) + '</b>';
-    var cardName = '<a href="https://trello.com/c/' + action.data.card.shortLink +'">' + he.encode(action.data.card.name) + '</a>';
     
-    var boardName = action.data.boardAfter ? action.data.boardAfter.name : action.data.board.name;
-    boardName = '<a href="' + model.shortUrl + '">' + he.encode(boardName) + '</a>';
+    var message = null;
+
+    if (action.data.card) {
+        (function(){
+            var userName = '<b>' + he.encode(action.memberCreator.fullName) + '</b>';
+
+            var cardName = '<a href="https://trello.com/c/' + action.data.card.shortLink +'">' + he.encode(action.data.card.name) + '</a>';
+
+            var boardName = action.data.boardAfter ? action.data.boardAfter.name : action.data.board.name;
+            boardName = '<a href="' + model.shortUrl + '">' + he.encode(boardName) + '</a>';
+
+            var listName = '<b>' + he.encode(action.data.listAfter ? action.data.listAfter.name : action.data.list.name) + '</b>';
+
+            switch (action.type) {
+            case 'updateCard':
+                message = userName + ' moved ' + cardName + ' to ' + listName + ' (' + boardName + ')';
+                break;
+            case 'createCard':
+                message = userName + ' created ' + cardName + ' in ' + listName + ' (' + boardName + ')';
+                break;
+            case 'commentCard':
+                message = userName + ' commented ' + cardName + ' in ' + listName + ' (' + boardName + '):<br>'
+                    + '<quote>' + he.encode(action.data.text) + '</quote>';
+                break;
+            default:
+                message = userName + ' did something to ' + cardName + ' in ' + listName + ' (' + boardName + ')';
+            }
+        });
+    } else if (action.data.list) {
+        (function(){
+            var userName = '<b>' + he.encode(action.memberCreator.fullName) + '</b>';
+
+            var boardName = action.data.boardAfter ? action.data.boardAfter.name : action.data.board.name;
+            boardName = '<a href="' + model.shortUrl + '">' + he.encode(boardName) + '</a>';
     
-    var listName = '<b>' + he.encode(action.data.listAfter ? action.data.listAfter.name : action.data.list.name) + '</b>';
+            var listName = '<b>' + he.encode(action.data.list.name) + '</b>';
 
-    var message = 'someone did something!';
-
-    switch (action.type) {
-    case 'updateCard':
-        message = userName + ' moved ' + cardName + ' to ' + listName + ' (' + boardName + ')';
-        break;
-    case 'createCard':
-        message = userName + ' created ' + cardName + ' in ' + listName + ' (' + boardName + ')';
-        break;
-    case 'commentCard':
-        message = userName + ' commented ' + cardName + ' in ' + listName + ' (' + boardName + '):<br>'
-            + '<quote>' + he.encode(action.data.text) + '</quote>';
-        break;
-    default:
-        message = userName + ' did something to ' + cardName + ' in ' + listName + ' (' + boardName + ')';
+            switch (action.type) {
+            case 'createList':
+                message = userName + ' created ' + listName + ' in ' + boardName;
+                break;
+            default:
+                message = userName + ' did something to ' + listName + ' in ' + boardName;
+            }
+        });
     }
 
-    logger.info(message);
-
     try {
+
+        if (!message) throw "unknown message.";
+        logger.info(message);
+
         var conn = board2conn[model.id];
-        if (!conn) throw "unknown board!";
+        if (!conn) throw "unknown board.";
 
         var data = {
           room_id: conn.hipchat.room,
