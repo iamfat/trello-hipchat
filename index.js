@@ -84,7 +84,7 @@ server.post('/notify', function(req, res, next) {
         (function(){
             var userName = '<b>' + he.encode(action.memberCreator.fullName) + '</b>';
 
-            var cardName = '<a href="https://trello.com/c/' + action.data.card.shortLink +'">' + he.encode(action.data.card.name) + '</a>';
+            var cardName = '<a href="https://trello.com/c/' + action.data.card.shortLink +'">' + he.encode(action.data.card.name || ('#' + action.data.card.idShort)) + '</a>';
 
             var boardName = action.data.boardAfter ? action.data.boardAfter.name : action.data.board.name;
             boardName = '<a href="' + model.shortUrl + '">' + he.encode(boardName) + '</a>';
@@ -101,6 +101,9 @@ server.post('/notify', function(req, res, next) {
             case 'commentCard':
                 message = userName + ' commented ' + cardName + ' in ' + listName + ' (' + boardName + '):<br>'
                     + '<quote>' + he.encode(action.data.text) + '</quote>';
+                break;
+            case 'deleteCard':
+                message = userName + ' deleted ' + cardName + ' from ' + listName + ' (' + boardName + ')';
                 break;
             default:
                 message = userName + ' did something to ' + cardName + ' in ' + listName + ' (' + boardName + ')';
