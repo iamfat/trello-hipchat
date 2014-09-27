@@ -1,0 +1,22 @@
+---
+common:
+  trello:
+    callbackURL: https://your-app.herokuapp.com/notify
+    apiKey: <trelloAPIKey>
+    apiSecret: <trelloAPISecret>
+    token: <trelloToken>
+  hipchat:
+    sender: Trello
+    token: <hipchatAuthToken>
+connections:
+- name: board1
+  trello:
+    boardId: <trelloBoardId1>
+  hipchat:
+    room: room1
+- name: board2
+  trello:
+    boardId: <trelloBoardId2>
+  hipchat:
+    room: room2
+...
