@@ -105,7 +105,7 @@ server.post('/notify', function(req, res, next) {
             default:
                 message = userName + ' did something to ' + cardName + ' in ' + listName + ' (' + boardName + ')';
             }
-        });
+        })();
     } else if (action.data.list) {
         (function(){
             var userName = '<b>' + he.encode(action.memberCreator.fullName) + '</b>';
@@ -122,7 +122,7 @@ server.post('/notify', function(req, res, next) {
             default:
                 message = userName + ' did something to ' + listName + ' in ' + boardName;
             }
-        });
+        })();
     }
 
     try {
